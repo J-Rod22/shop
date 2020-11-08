@@ -66,11 +66,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   void dispose() {
+    _imageUrlFocusNode.removeListener(_updateImageUrl);
     _priceFocusNode.dispose();
     _descriptionFocusNode.dispose();
     _imageUrlController.dispose();
     _imageUrlFocusNode.dispose();
-    _imageUrlFocusNode.removeListener(_updateImageUrl);
     super.dispose();
   }
 
@@ -102,10 +102,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
         await Provider.of<Products>(context, listen: false)
             .addProduct(_editedProduct);
       } catch (error) {
-        showDialog<Null>(
+        await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text('An error ocurred!'),
+            title: Text('An error occurred!'),
             content: Text('Something went wrong.'),
             actions: <Widget>[
               FlatButton(
@@ -195,7 +195,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           return 'Please enter a valid number.';
                         }
                         if (double.parse(value) <= 0) {
-                          return 'Please enter a numnber greater than zero.';
+                          return 'Please enter a number greater than zero.';
                         }
                         return null;
                       },

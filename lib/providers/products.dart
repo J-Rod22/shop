@@ -8,8 +8,9 @@ import '../models/http_exception.dart';
 class Products with ChangeNotifier {
   List<Product> _items = [];
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -26,6 +27,10 @@ class Products with ChangeNotifier {
   Future<void> fetchAndSetProducts() async {
     final url =
         'https://flutter-course-shop-fe31d.firebaseio.com/products.json?auth=$authToken';
+
+    final urlFavorites =
+        'https://flutter-course-shop-fe31d.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+
     try {
       final response = await http.get(url);
 
@@ -33,17 +38,24 @@ class Products with ChangeNotifier {
 
       if (extractedData == null) return;
 
+      final favoriteResponse = await http.get(urlFavorites);
+
+      final favoriteData = json.decode(favoriteResponse.body);
+
       final List<Product> loadedProducts = [];
 
       extractedData.forEach((prodId, prodData) {
-        loadedProducts.add(Product(
-          id: prodId,
-          title: prodData['title'],
-          description: prodData['description'],
-          price: prodData['price'],
-          imageUrl: prodData['imageUrl'],
-          isFavorite: prodData['isFavorite'],
-        ));
+        loadedProducts.add(
+          Product(
+            id: prodId,
+            title: prodData['title'],
+            description: prodData['description'],
+            price: prodData['price'],
+            imageUrl: prodData['imageUrl'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
+          ),
+        );
       });
       _items = loadedProducts;
       notifyListeners();
@@ -64,7 +76,6 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavorite': product.isFavorite,
         }),
       );
 
