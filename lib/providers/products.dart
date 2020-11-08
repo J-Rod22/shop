@@ -24,9 +24,10 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     final url =
-        'https://flutter-course-shop-fe31d.firebaseio.com/products.json?auth=$authToken';
+        'https://flutter-course-shop-fe31d.firebaseio.com/products.json?auth=$authToken&$filterString';
 
     final urlFavorites =
         'https://flutter-course-shop-fe31d.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
@@ -76,6 +77,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
+          'creatorId': userId,
         }),
       );
 
